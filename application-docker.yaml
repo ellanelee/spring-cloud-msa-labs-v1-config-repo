@@ -1,0 +1,74 @@
+spring:
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: admin
+    password: admin123
+    template:
+      observation-enabled: true
+    listener:
+      observation-enabled: true
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics, tracing, refresh
+
+  tracing:
+    sampling:
+      probability: 1.0
+
+  zipkin:
+    tracing:
+      endpoint: http://zipkin:9411/api/v2/spans
+
+otel:
+  exporter:
+    zipkin:
+      endpoint: http://otel:9411/api/v2/spans
+  resource:
+    attributes:
+      service.name: ${spring.application.name}
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%X{traceId:-},%X{spanId:-}] %-5level %logger{36} - %msg%n"
+  level:
+    com.sesac: DEBUG
+    io.micrometer.tracing: DEBUG
+    org.springframework.web: DEBUG
+
+order:  # order의 event에 대해 exchange와 queue 설정
+  event:
+    exchange: order.exchange
+    queue:
+      notification: order.notification.queue
+      inventory: order.inventory.queue
+      payment-request: order.payment.request.queue
+      inventory-failed: order.inventory.failed.queue
+      payment-completed: order.payment.completed.queue
+      payment-failed: order.payment.failed.queue
+      inventory-restore: order.inventory.restore.queue
+
+    routing-key:
+      notification: order.notification
+      inventory: order.inventory
+      payment-request: order.payment.request
+      inventory-failed: order.inventory.failed
+      payment-completed: order.payment.completed
+      payment-failed: order.payment.failed
+      inventory-restore: order.inventory.restore
